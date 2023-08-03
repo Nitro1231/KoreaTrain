@@ -2,6 +2,7 @@ from SRT import *
 from korail2 import *
 
 from .constants import Platform
+from .dataclass import Search, SRSearch, KorailSearch
 
 
 class KoreaTrain:
@@ -17,9 +18,9 @@ class KoreaTrain:
 
         match platform:
             case Platform.SR:
-                self.service = SRT(auto_login=auto_login, verbose=feedback)
+                self.service = SRT(username, password, False, feedback)
             case Platform.KORAIL:
-                self.service = Korail(auto_login=auto_login, want_feedback=feedback)
+                self.service = Korail(username, password, False, feedback)
             case _:
                 raise ValueError
 
@@ -27,7 +28,7 @@ class KoreaTrain:
 
 
     def __repr__(self) -> str:
-        return f'[KoreaTrain] Platform: {self.platform}, login? {self.logged_in}.'
+        return f'[{type(self).__name__}] platform: {self.platform}, logged_in: {self.logged_in}.'
 
 
     def login(self, username: str | None = None, password: str | None = None) -> bool:
@@ -43,3 +44,56 @@ class KoreaTrain:
     def logout(self) -> bool:
         self.service.logout()
         return True
+
+
+    def search_train(self, param: Search, available_only: bool = True) -> list:
+        match self.platform:
+            case Platform.SR:
+                if type(param) != SRSearch:
+                    raise ValueError('Mismatched param type.')
+                return self.service.search_train(
+                    dep=param.dep,
+                    arr=param.arr,
+                    date=param.date,
+                    time=param.time,
+                    time_limit=param.time_limit,
+                    available_only=available_only
+                )
+
+            case Platform.KORAIL:
+                if type(param) != KorailSearch:
+                    raise ValueError('Mismatched param type.')
+                trains = self.service.search_train_allday(
+                    dep=param.dep,
+                    arr=param.arr,
+                    date=param.date,
+                    time=param.time,
+                    train_type=param.train_type,
+                    passengers=param.passengers,
+                    include_no_seats=(not available_only)
+                )
+
+                if param.time is None: param.time = '000000'
+                if param.time_limit is None:
+                    return trains
+                else:
+                    return [train for train in trains if int(param.time) <= int(train.dep_time) <= int(param.time_limit)]
+
+            case _:
+                raise ValueError('Invalid search parameters.')
+
+
+    def reserve(self):
+        pass
+
+
+    def tickets(self):
+        pass
+
+
+    def reservations(self):
+        pass
+
+
+    def cancel(self):
+        pass
