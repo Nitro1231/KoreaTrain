@@ -5,17 +5,16 @@ from dataclasses import dataclass
 
 
 @dataclass
-class Search:
+class Parameter:
     dep: str
     arr: str
     date: str | None = get_date()
     time: str | None = get_time()
     time_limit: str | None = None
-
+    passengers: list[Passenger] | None = None
 
 @dataclass
-class SRSearch(Search):
-    passengers: list[Passenger] | None = None
+class SRParameter(Parameter):
     reserve_option: SeatType = SeatType.GENERAL_FIRST
     window: bool | None = None
 
@@ -24,10 +23,9 @@ class SRSearch(Search):
 
 
 @dataclass
-class KorailSearch(Search):
+class KorailParameter(Parameter):
     train_type: TrainType = TrainType.ALL
-    passengers: list[Passenger] = None
-    reserve_option: ReserveOption = None
+    reserve_option: ReserveOption = ReserveOption.GENERAL_FIRST
 
     def __repr__(self) -> str:
         return f'[{type(self).__name__}] {self.__dict__}'

@@ -1,17 +1,32 @@
 from SRT import *
 from korail2 import *
 
+from .tools import get_time
 from .constants import Platform
-from .dataclass import Search, SRSearch, KorailSearch
+from .dataclass import Parameter, SRParameter, KorailParameter
 
 
 class KoreaTrain:
-    def __init__(self, platform: Platform, username: str | None = None, password: str | None = None, auto_login: bool = True, feedback: bool = False) -> None:
+    def __init__(
+            self,
+            platform: Platform,
+            parameter: Parameter | None = None,
+            username: str | None = None,
+            password: str | None = None,
+            auto_login: bool = True,
+            feedback: bool = False
+        ) -> None:
+
         self.platform = platform
+        self.parameter = parameter
         self.username = username
         self.password = password
+
         self.logged_in = False
         self.service = None
+
+        if parameter is not None and not isinstance(parameter, Parameter):
+            raise ValueError('Invalid parameter.')
 
         if username is None and password is None:
             auto_login = False
@@ -22,13 +37,13 @@ class KoreaTrain:
             case Platform.KORAIL:
                 self.service = Korail(username, password, False, feedback)
             case _:
-                raise ValueError
+                raise ValueError('Invalid platform.')
 
         if auto_login: self.login()
 
 
     def __repr__(self) -> str:
-        return f'[{type(self).__name__}] platform: {self.platform}, logged_in: {self.logged_in}.'
+        return f'[{type(self).__name__}] platform: {self.platform}, parameter: {self.parameter}, logged_in: {self.logged_in}.'
 
 
     def login(self, username: str | None = None, password: str | None = None) -> bool:
@@ -46,45 +61,85 @@ class KoreaTrain:
         return True
 
 
-    def search_train(self, param: Search, available_only: bool = True) -> list:
+    def set_parameter(self, parameter: Parameter):
+        if isinstance(parameter, Parameter): # Check if the base class of the parameter is the Parameter.
+            self.parameter = parameter
+        else:
+            raise ValueError('Invalid parameter.')
+
+
+    def search_train(self, parameter: Parameter | None = None, available_only: bool = True) -> list:
+        if parameter is None:
+            parameter = self.parameter
+        if parameter is None or not isinstance(parameter, Parameter):
+            raise ValueError('Invalid parameter.')
+
         match self.platform:
             case Platform.SR:
-                if type(param) != SRSearch:
-                    raise ValueError('Mismatched param type.')
+                if type(parameter) is not SRParameter:
+                    raise ValueError('Invalid parameter.')
                 return self.service.search_train(
-                    dep=param.dep,
-                    arr=param.arr,
-                    date=param.date,
-                    time=param.time,
-                    time_limit=param.time_limit,
+                    dep=parameter.dep,
+                    arr=parameter.arr,
+                    date=parameter.date,
+                    time=parameter.time,
+                    time_limit=parameter.time_limit,
                     available_only=available_only
                 )
 
             case Platform.KORAIL:
-                if type(param) != KorailSearch:
-                    raise ValueError('Mismatched param type.')
+                if type(parameter) is not KorailParameter:
+                    raise ValueError('Invalid parameter.')
+                
+                # TODO: Optimize this by calling multiple search_train instead of calling the search_train_allday.
                 trains = self.service.search_train_allday(
-                    dep=param.dep,
-                    arr=param.arr,
-                    date=param.date,
-                    time=param.time,
-                    train_type=param.train_type,
-                    passengers=param.passengers,
+                    dep=parameter.dep,
+                    arr=parameter.arr,
+                    date=parameter.date,
+                    time=parameter.time,
+                    train_type=parameter.train_type,
+                    passengers=parameter.passengers,
                     include_no_seats=(not available_only)
                 )
 
-                if param.time is None: param.time = '000000'
-                if param.time_limit is None:
+                if parameter.time is None: parameter.time = get_time()
+                if parameter.time_limit is None:
                     return trains
                 else:
-                    return [train for train in trains if int(param.time) <= int(train.dep_time) <= int(param.time_limit)]
+                    return [train for train in trains if int(parameter.time) <= int(train.dep_time) <= int(parameter.time_limit)]
 
             case _:
-                raise ValueError('Invalid search parameters.')
+                raise ValueError('Invalid platform.')
 
 
-    def reserve(self):
-        pass
+    def reserve(self, train, parameter: Parameter | None = None):
+        if parameter is None:
+            parameter = self.parameter
+        if parameter is None or not isinstance(parameter, Parameter):
+            raise ValueError('Invalid parameter.')
+
+        match self.platform:
+            case Platform.SR:
+                if type(parameter) is not SRParameter:
+                    raise ValueError('Invalid parameter.')
+                return self.service.reserve(
+                    train=train,
+                    passengers=parameter.passengers,
+                    special_seat=parameter.reserve_option,
+                    window_seat=parameter.window
+                )
+
+            case Platform.KORAIL:
+                if type(parameter) is not KorailParameter:
+                    raise ValueError('Invalid parameter.')
+                return self.service.reserve(
+                    train=train,
+                    passengers=parameter.passengers,
+                    option=parameter.reserve_option
+                )
+
+            case _:
+                raise ValueError('Invalid platform.')
 
 
     def tickets(self):
