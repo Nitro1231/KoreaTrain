@@ -1,4 +1,4 @@
-from korea_train import *
+from koreatrain import *
 
 ko = KoreaTrain(Platform.KORAIL, feedback=True)
 print(ko)
