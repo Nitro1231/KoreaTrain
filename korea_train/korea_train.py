@@ -142,13 +142,22 @@ class KoreaTrain:
                 raise ValueError('Invalid platform.')
 
 
-    def tickets(self):
-        pass
+    def get_reservations(self, paid_only: bool = False) -> list:
+        # TODO: paid_only option only works for SR. Implement one for Korail.
+        match self.platform:
+            case Platform.SR:
+                return self.service.get_reservations(paid_only)
+
+            case Platform.KORAIL:
+                return self.service.reservations()
+
+            case _:
+                raise ValueError('Invalid platform.')
 
 
-    def reservations(self):
-        pass
+    # def get_tickets(self):
+    #     pass
 
 
-    def cancel(self):
-        pass
+    def cancel(self, reservation) -> bool:
+        return self.service.cancel(reservation)
