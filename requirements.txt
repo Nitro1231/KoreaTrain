@@ -1,0 +1,2 @@
+SRTrain>=2.0.8
+korail2 @ git+https://github.com/carpedm20/korail2@master
