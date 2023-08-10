@@ -4,6 +4,7 @@ from korail2 import *
 from .tools import get_time
 from .constants import Platform
 from .dataclass import Parameter, SRParameter, KorailParameter
+from .errors import KoreaTrainError, KoreaTrainLoginError, KoreaTrainNotLoginError
 
 
 class KoreaTrain:
@@ -26,7 +27,7 @@ class KoreaTrain:
         self.service = None
 
         if parameter is not None and not isinstance(parameter, Parameter):
-            raise ValueError('Invalid parameter.')
+            raise TypeError('Invalid type: `parameter` must be a Parameter instance.')
 
         if username is None and password is None:
             auto_login = False
@@ -37,7 +38,7 @@ class KoreaTrain:
             case Platform.KORAIL:
                 self.service = Korail(username, password, False, feedback)
             case _:
-                raise ValueError('Invalid platform.')
+                raise ValueError(f'Invalid value: invalid platform value ({platform}) has been received.')
 
         if auto_login: self.login()
 
@@ -50,7 +51,7 @@ class KoreaTrain:
         if username is None: username = self.username
         if password is None: password = self.password
         if username is None or password is None:
-            raise ValueError('Invalid login information')
+            raise TypeError('Invalid type: the username or password cannot be None.')
 
         self.logged_in = self.service.login(username, password)
         return self.logged_in
@@ -65,19 +66,19 @@ class KoreaTrain:
         if isinstance(parameter, Parameter): # Check if the base class of the parameter is the Parameter.
             self.parameter = parameter
         else:
-            raise ValueError('Invalid parameter.')
+            raise TypeError('Invalid type: `parameter` must be a Parameter instance.')
 
 
     def search_train(self, parameter: Parameter | None = None, available_only: bool = True) -> list:
         if parameter is None:
             parameter = self.parameter
         if parameter is None or not isinstance(parameter, Parameter):
-            raise ValueError('Invalid parameter.')
+            raise TypeError('Invalid type: `parameter` must be a Parameter instance.')
 
         match self.platform:
             case Platform.SR:
                 if type(parameter) is not SRParameter:
-                    raise ValueError('Invalid parameter.')
+                    raise TypeError('Invalid type: only SRParameter can be used when the platform is specified as SR.')
                 return self.service.search_train(
                     dep=parameter.dep,
                     arr=parameter.arr,
@@ -89,7 +90,7 @@ class KoreaTrain:
 
             case Platform.KORAIL:
                 if type(parameter) is not KorailParameter:
-                    raise ValueError('Invalid parameter.')
+                    raise TypeError('Invalid type: only KorailParameter can be used when the platform is specified as KORAIL.')
                 
                 # TODO: Optimize this by calling multiple search_train instead of calling the search_train_allday.
                 trains = self.service.search_train_allday(
@@ -108,15 +109,14 @@ class KoreaTrain:
                 else:
                     return [train for train in trains if int(parameter.time) <= int(train.dep_time) <= int(parameter.time_limit)]
 
-            case _:
-                raise ValueError('Invalid platform.')
-
 
     def reserve(self, train, parameter: Parameter | None = None):
+        if not self.logged_in:
+            raise KoreaTrainNotLoginError()
         if parameter is None:
             parameter = self.parameter
         if parameter is None or not isinstance(parameter, Parameter):
-            raise ValueError('Invalid parameter.')
+            raise TypeError('Invalid type: `parameter` must be a Parameter instance.')
 
         match self.platform:
             case Platform.SR:
@@ -138,21 +138,18 @@ class KoreaTrain:
                     option=parameter.reserve_option
                 )
 
-            case _:
-                raise ValueError('Invalid platform.')
-
 
     def get_reservations(self, paid_only: bool = False) -> list:
-        # TODO: paid_only option only works for SR. Implement one for Korail.
+        if not self.logged_in:
+            raise KoreaTrainNotLoginError()
+
         match self.platform:
             case Platform.SR:
                 return self.service.get_reservations(paid_only)
 
             case Platform.KORAIL:
+                # TODO: paid_only option only works for SR. Implement one for Korail.
                 return self.service.reservations()
-
-            case _:
-                raise ValueError('Invalid platform.')
 
 
     # def get_tickets(self):
@@ -160,4 +157,6 @@ class KoreaTrain:
 
 
     def cancel(self, reservation) -> bool:
+        if not self.logged_in:
+            raise KoreaTrainNotLoginError()
         return self.service.cancel(reservation)
