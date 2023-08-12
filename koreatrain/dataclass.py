@@ -26,6 +26,5 @@ class Parameter:
     seat_type: SeatType = SeatType.DEFAULT
     reserve_option: ReserveOption = ReserveOption.GENERAL_FIRST
 
-
     def __repr__(self) -> str:
         return f'[{type(self).__name__}] {self.__dict__}'

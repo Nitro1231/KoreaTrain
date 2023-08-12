@@ -11,7 +11,7 @@ class Platform(Enum):
 
 
 class TrainType(Enum):                      # Korail 전용
-    KTX             = '100'                 # KTX, KTX-산천
+    KTX             = '100'                 # KTX
     SAEMAEUL        = '101'                 # 새마을호
     MUGUNGHWA       = '102'                 # 무궁화호
     TONGGUEN        = '103'                 # 통근열차
