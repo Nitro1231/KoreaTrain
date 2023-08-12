@@ -6,11 +6,11 @@ class KoreaTrainError(Exception):
         return self.msg
 
 
-class KoreaTrainLoginError(KoreaTrainError):
+class LoginError(KoreaTrainError):
     def __init__(self, msg='Login failed, please check platform, username, and password.'):
         super().__init__(msg)
 
 
-class KoreaTrainNotLoginError(KoreaTrainError):
+class NotLoggedInError(KoreaTrainError):
     def __init__(self):
         super().__init__('Not logged in.')
