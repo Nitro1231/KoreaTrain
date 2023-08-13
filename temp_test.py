@@ -14,3 +14,12 @@ print(ko_id, ko_pw)
 k = Korail(ko_id, ko_pw, auto_login=False, feedback=True)
 print(k.login())
 print(k.logout())
+
+p = Parameter(
+    dep='서울',
+    arr='부산',
+    date='20230815',
+    time='210000'
+)
+print(p)
+print(k.search_train(p))

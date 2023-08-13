@@ -1,4 +1,4 @@
-from .constants import KST  
+from .constants import KST
 from datetime import datetime
 
 
