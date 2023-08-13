@@ -13,3 +13,4 @@ print(ko_id, ko_pw)
 
 k = Korail(ko_id, ko_pw, auto_login=False, feedback=True)
 print(k.login())
+print(k.logout())

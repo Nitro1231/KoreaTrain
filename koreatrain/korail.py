@@ -102,3 +102,10 @@ class Korail():
         else:
             self.logged_in = False
             return False
+
+
+    def logout(self) -> bool:
+        res = self.session.get(KORAIL_LOGOUT)
+        self._log(res.text)
+        self.logged_in = False
+        return False
