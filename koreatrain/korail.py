@@ -108,9 +108,9 @@ class Korail:
 
     def logout(self) -> bool:
         res = self.session.get(KORAIL_LOGOUT)
-        self._log(res.text)
+        self._log(res.text.strip())
         self.logged_in = False
-        return False
+        return True
 
 
     def search_train(self, parameter: Parameter | None = None, available_only: bool = True) -> list:

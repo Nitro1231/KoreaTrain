@@ -98,6 +98,13 @@ class SR:
             return True
 
 
+    def logout(self) -> bool:
+        res = self.session.get(SR_LOGOUT)
+        self._log(res.text.strip())
+        self.logged_in = False
+        return True
+
+
     def _log(self, msg: str) -> None:
         if self.feedback:
             print('[*SR]', msg)

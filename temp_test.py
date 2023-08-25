@@ -13,7 +13,7 @@ print('[KO_LOGIN_INFO]', ko_id, ko_pw)
 
 s = SR(sr_id, sr_pw, auto_login=False, feedback=True)
 print(s.login())
-# print(s.logout())
+print(s.logout())
 
 k = Korail(ko_id, ko_pw, auto_login=False, feedback=True)
 print(k.login())
