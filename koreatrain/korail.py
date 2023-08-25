@@ -34,14 +34,18 @@ KORAIL_EVENT = f'{KORAIL_MOBILE}.common.event'
 KORAIL_PAYMENT = f'{KORAIL_DOMAIN}/ebizmw/PrdPkgMainList.do'
 KORAIL_PAYMENT_VOUCHER = f'{KORAIL_DOMAIN}/ebizmw/PrdPkgBoucherView.do'
 
-DEFAULT_USER_AGENT = 'Dalvik/2.1.0 (Linux; U; Android 5.1.1; Nexus 4 Build/LMY48T)'
-
+DEFAULT_HEADERS = {
+    'User-Agent': 'Dalvik/2.1.0 (Linux; U; Android 5.1.1; Nexus 4 Build/LMY48T)'
+}
 
 DEVICE = 'AD'
 KORAIL_VER = '190617001'
 
+RESULT_SUCCESS = 'SUCC'
+RESULT_FAIL = 'FAIL'
 
-class Korail():
+
+class Korail:
     def __init__(
             self,
             # parameter: Parameter | None = None,
@@ -52,7 +56,7 @@ class Korail():
         ) -> None:
 
         self.session = requests.session()
-        self.session.headers.update({'User-Agent': DEFAULT_USER_AGENT})
+        self.session.headers.update(DEFAULT_HEADERS)
 
         # self.parameter = parameter
         self.username = username
@@ -61,7 +65,7 @@ class Korail():
 
         self.logged_in = False
 
-        if (not (username is None and password is None)) and auto_login:
+        if auto_login and (not (username is None and password is None)):
             self.login()
 
 
@@ -89,7 +93,7 @@ class Korail():
         json_data = json.loads(res.text)
         self._log(json_data)
 
-        if json_data['strResult'] == 'SUCC' and json_data.get('strMbCrdNo') is not None:
+        if json_data['strResult'] == RESULT_SUCCESS and json_data.get('strMbCrdNo') is not None:
             self.key = json_data['Key']
             # self.membership_number = j['strMbCrdNo']
             # self.name = j['strCustNm']
@@ -98,6 +102,7 @@ class Korail():
             return True
         else:
             self.logged_in = False
+            # raise LoginError(json_data['h_msg_txt'])
             return False
 
 
@@ -144,6 +149,7 @@ class Korail():
         if self._result_check(json_data):
             train_infos = json_data['trn_infos']['trn_info']
             print(train_infos)
+            # 여기부터
 
 
     def _log(self, msg: str) -> None:
@@ -157,7 +163,7 @@ class Korail():
         if self.feedback:
             self._log(text)
 
-        if json_data['strResult'] == 'FAIL':
+        if json_data['strResult'] == RESULT_FAIL:
             code = json_data['h_msg_cd']
 
             match code:
