@@ -2,9 +2,11 @@
 # https://github.com/ryanking13/SRT/blob/master/SRT/srt.py
 
 
+import json
 import requests
 from .dataclass import Parameter, Passenger
 from .constants import PassengerType, EMAIL_REGEX, PHONE_NUMBER_REGEX
+from .errors import LoginError
 
 
 SCHEME = 'https'
@@ -30,6 +32,9 @@ DEFAULT_HEADERS = {
     'Accept': 'application/json',
 }
 
+RESULT_SUCCESS = 'SUCC'
+RESULT_FAIL = 'FAIL'
+
 
 class SR:
     def __init__(
@@ -53,4 +58,46 @@ class SR:
 
         if auto_login and (not (username is None and password is None)):
             self.login()
-        
+
+
+    def login(self, username: str | None = None, password: str | None = None) -> bool:
+        if username is not None: self.username = username
+        if password is not None: self.password = password
+        if self.username is None or self.password is None:
+            raise TypeError('The username or password cannot be None type.')
+
+        if EMAIL_REGEX.match(self.username):
+            login_type = '2'
+        elif PHONE_NUMBER_REGEX.match(self.username):
+            login_type = '3'
+            self.username = self.username.replace('-', '')
+        else:
+            login_type = '1'
+
+        data = {
+            'auto': 'Y',
+            'check': 'Y',
+            'page': 'menu',
+            'deviceKey': '-',
+            'customerYn': '',
+            'login_referer': SR_MAIN,
+            'srchDvCd': login_type,
+            'srchDvNm': self.username,
+            'hmpgPwdCphd': self.password,
+        }
+        res = self.session.post(SR_LOGIN, data=data)
+        json_data = json.loads(res.text)
+        self._log(json_data)
+
+        if json_data.get('strResult') == RESULT_FAIL:
+            self.logged_in = False
+            # raise LoginError(json_data['MSG'])
+            return False
+        else:
+            self.logged_in = True
+            return True
+
+
+    def _log(self, msg: str) -> None:
+        if self.feedback:
+            print('[*SR]', msg)
