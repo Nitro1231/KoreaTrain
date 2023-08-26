@@ -11,6 +11,8 @@ print('[KO_LOGIN_INFO]', ko_id, ko_pw)
 
 # print(Parameter('a', 'b'))
 
+print(search_station('김천 구미', 3))
+
 s = SR(sr_id, sr_pw, auto_login=False, feedback=True)
 print(s.login())
 print(s.logout())

@@ -3,7 +3,9 @@ import requests
 
 
 URL = 'https://www.letskorail.com/ebizcom/cs/center/stnCodeJson.do'
-
+EXCEPTION = {
+    '김천(구미)': '0507',
+}
 
 def get_station(num: int) -> dict:
     data = { 'iKorInx': num }
@@ -20,6 +22,9 @@ if __name__ == '__main__':
     info = dict()
     for item in items:
         info[item['stnNm']] = item['stnCd']
+
+    for k, v in EXCEPTION.items():
+        info[k] = v
 
     with open('station_codes.json', 'w', encoding='utf8') as f:
         f.write(json.dumps(info, indent=4, ensure_ascii=False))
