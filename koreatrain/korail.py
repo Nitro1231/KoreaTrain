@@ -4,7 +4,7 @@
 
 import json
 import requests
-from .dataclass import Parameter, Passenger
+from .dataclass import Parameter, Passenger, KorailTrain
 from .constants import PassengerType, EMAIL_REGEX, PHONE_NUMBER_REGEX
 from .errors import KoreaTrainError, LoginError, NotLoggedInError, SoldOutError, NoResultsError, ResponseError
 from .tools import count, save_json
@@ -147,7 +147,8 @@ class Korail:
         if self._result_check(json_data):
             train_infos = json_data['trn_infos']['trn_info']
             print(train_infos)
-            # 여기부터
+            trains = [KorailTrain(info) for info in train_infos]
+            # print('Trains:', trains)
 
 
     def _log(self, *msg: str) -> None:

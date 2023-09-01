@@ -7,6 +7,23 @@ KST = timezone(timedelta(hours=9))
 EMAIL_REGEX = re.compile(r'[^@]+@[^@]+\.[^@]+')
 PHONE_NUMBER_REGEX = re.compile(r'(\d{3})-(\d{3,4})-(\d{4})')
 
+TRAIN_NAME = {
+    '00': 'KTX',
+    '01': '새마을호',
+    '02': '무궁화',
+    '03': '통근열차',
+    '04': '누리로',
+    '05': '전체',
+    '06': '공항직통',
+    '07': 'KTX-산천',
+    '08': 'ITX-새마을',
+    '09': 'ITX-청춘',
+    '10': 'KTX-산천',
+    '17': 'SRT',
+}
+
+NOT_AVAILABLE = ['-', '부족', '좌석부족', '매진']
+
 
 class Platform(Enum):
     SR      = 0

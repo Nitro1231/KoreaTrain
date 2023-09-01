@@ -6,7 +6,7 @@ import json
 import requests
 from functools import reduce
 from .station import search_station, STATION_CODE
-from .dataclass import Parameter, Passenger
+from .dataclass import Parameter, Passenger, SRTrain
 from .constants import PassengerType, EMAIL_REGEX, PHONE_NUMBER_REGEX
 from .errors import NoResultsError, ResponseError
 from .tools import count, save_json
@@ -148,7 +148,8 @@ class SR:
         if self._result_check(json_data):
             train_infos = json_data['outDataSets']['dsOutput1']
             print(train_infos)
-            # 여기부터
+            trains = [SRTrain(info) for info in train_infos]
+            # print('Trains:', trains)
 
 
     def _log(self, *msg: str) -> None:

@@ -260,6 +260,8 @@ STATION_CODE = {
     '김천(구미)': '0507'
 }
 
+STATION_NAME = {v: k for (k, v) in STATION_CODE.items()}
+
 
 def search_station(station_name: str, n: int = 2) -> list[str]:
     return get_close_matches(station_name, STATION_CODE.keys(), n, CUTOFF)
