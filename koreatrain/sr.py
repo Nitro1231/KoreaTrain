@@ -8,8 +8,8 @@ from functools import reduce
 from .station import search_station, STATION_CODE
 from .dataclass import Parameter, Passenger
 from .constants import PassengerType, EMAIL_REGEX, PHONE_NUMBER_REGEX
-from .errors import LoginError
-from .tools import count
+from .errors import NoResultsError, ResponseError
+from .tools import count, save_json
 
 
 SCHEME = 'https'
@@ -141,7 +141,14 @@ class SR:
         }
         self._log(data)
         res = self.session.post(SR_SEARCH_SCHEDULE, data=data)
-        self._log(res.text)
+        json_data = json.loads(res.text)
+        self._log(json_data)
+        save_json(json_data, f'sr_{parameter.date}-{parameter.time}_{parameter.dep}-{parameter.arr}.json')
+
+        if self._result_check(json_data):
+            train_infos = json_data['outDataSets']['dsOutput1']
+            print(train_infos)
+            # 여기부터
 
 
     def _log(self, *msg: str) -> None:
@@ -149,5 +156,15 @@ class SR:
             print('[*SR]', *msg)
 
 
-    def _parse_data(self, response: str):
-        pass
+    def _result_check(self, json_data: dict):
+        status = json_data['resultMap'][0]
+        result = status.get('strResult')
+
+        if result is None:
+            raise NoResultsError('Response status is not given.')
+        if result == RESULT_SUCCESS:
+            return True
+        elif result == RESULT_FAIL:
+            raise ResponseError(f'Request failed: {status["msgTxt"]}.')
+        else:
+            raise ResponseError(f'Undefined result status "{result}".')

@@ -14,19 +14,25 @@ print('[KO_LOGIN_INFO]', ko_id, ko_pw)
 # print(search_station('김천 구미', 3))
 
 s = SR(sr_id, sr_pw, auto_login=False, feedback=True)
-print(s.login())
-print(s.logout())
+# print(s.login())
+# print(s.logout())
 
 k = Korail(ko_id, ko_pw, auto_login=False, feedback=True)
 # print(k.login())
 # print(k.logout())
 
 
-p = Parameter(
+ps = Parameter(
     dep='수서',
     arr='부산',
-    date='20230905',
-    time='210000'
+    passengers=[Passenger(PassengerType.ADULT), Passenger(PassengerType.CHILD, 2)]
 )
-print(p)
-print(s.search_train(p))
+pk = Parameter(
+    dep='서울',
+    arr='부산',
+    passengers=[Passenger(PassengerType.ADULT), Passenger(PassengerType.CHILD, 2)]
+)
+
+print(s.search_train(ps))
+print('=' * 30)
+print(k.search_train(pk))

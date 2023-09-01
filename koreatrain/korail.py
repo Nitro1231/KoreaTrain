@@ -7,7 +7,7 @@ import requests
 from .dataclass import Parameter, Passenger
 from .constants import PassengerType, EMAIL_REGEX, PHONE_NUMBER_REGEX
 from .errors import KoreaTrainError, LoginError, NotLoggedInError, SoldOutError, NoResultsError, ResponseError
-from .tools import count
+from .tools import count, save_json
 
 
 SCHEME = 'https'
@@ -142,6 +142,7 @@ class Korail:
         res = self.session.get(KORAIL_SEARCH_SCHEDULE, params=data)
         json_data = json.loads(res.text)
         self._log(json_data)
+        save_json(json_data, f'ko_{parameter.date}-{parameter.time}_{parameter.dep}-{parameter.arr}.json')
 
         if self._result_check(json_data):
             train_infos = json_data['trn_infos']['trn_info']
