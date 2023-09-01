@@ -9,6 +9,7 @@ from .station import search_station, STATION_CODE
 from .dataclass import Parameter, Passenger
 from .constants import PassengerType, EMAIL_REGEX, PHONE_NUMBER_REGEX
 from .errors import LoginError
+from .tools import count
 
 
 SCHEME = 'https'
@@ -126,11 +127,11 @@ class SR:
             'dptDt': parameter.date,
             'dptTm': parameter.time,
             'psgNum': reduce(lambda x, y: x + y.count, parameter.passengers, 0),                        # Total count
-            'psgInfoPerPrnb1': self._count(parameter.passengers, PassengerType.ADULT),                  # 어른 - 만 13세 이상
-            'psgInfoPerPrnb5': self._count(parameter.passengers, PassengerType.CHILD),                  # 어린이 - 만 6세 ~ 12세 어린이
-            'psgInfoPerPrnb4': self._count(parameter.passengers, PassengerType.SENIOR),                 # 경로 - 만 65세 이상 경로
-            'psgInfoPerPrnb2': self._count(parameter.passengers, PassengerType.DISABILITY_1_TO_3),      # 중증 - 장애의 정도가 심한 장애인(구1~3급)
-            'psgInfoPerPrnb3': self._count(parameter.passengers, PassengerType.DISABILITY_4_TO_6),      # 경증 - 장애의 정도가 심하지 않은 장애인(구4~6급)
+            'psgInfoPerPrnb1': count(parameter.passengers, PassengerType.ADULT),                  # 어른 - 만 13세 이상
+            'psgInfoPerPrnb5': count(parameter.passengers, PassengerType.CHILD),                  # 어린이 - 만 6세 ~ 12세 어린이
+            'psgInfoPerPrnb4': count(parameter.passengers, PassengerType.SENIOR),                 # 경로 - 만 65세 이상 경로
+            'psgInfoPerPrnb2': count(parameter.passengers, PassengerType.DISABILITY_1_TO_3),      # 중증 - 장애의 정도가 심한 장애인(구1~3급)
+            'psgInfoPerPrnb3': count(parameter.passengers, PassengerType.DISABILITY_4_TO_6),      # 경증 - 장애의 정도가 심하지 않은 장애인(구4~6급)
             'locSeatAttCd1': parameter.seat_location.value,
             'rqSeatAttCd1': parameter.seat_type.value,
             'trnGpCd': '300',
@@ -150,6 +151,3 @@ class SR:
 
     def _parse_data(self, response: str):
         pass
-
-    def _count(self, passengers: list[Passenger], passenger_type: PassengerType) -> int:
-        return reduce(lambda x, y: x + y.count, list(filter(lambda x: x.type_code == passenger_type, passengers)), 0)
