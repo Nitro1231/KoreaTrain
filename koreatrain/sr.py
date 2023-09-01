@@ -4,6 +4,8 @@
 
 import json
 import requests
+from functools import reduce
+from .station import search_station, STATION_CODE
 from .dataclass import Parameter, Passenger
 from .constants import PassengerType, EMAIL_REGEX, PHONE_NUMBER_REGEX
 from .errors import LoginError
@@ -99,12 +101,55 @@ class SR:
 
 
     def logout(self) -> bool:
-        res = self.session.get(SR_LOGOUT)
+        res = self.session.post(SR_LOGOUT)
         self._log(res.text.strip())
         self.logged_in = False
         return True
 
 
-    def _log(self, msg: str) -> None:
+    def search_train(self, parameter: Parameter | None = None, available_only: bool = True) -> list:
+        if parameter.dep not in STATION_CODE:
+            raise ValueError(f'Station "{parameter.dep}" not exists. Did you mean: {search_station(parameter.dep, 1)}?')
+        if parameter.arr not in STATION_CODE:
+            raise ValueError(f'Station "{parameter.dep}" not exists. Did you mean: {search_station(parameter.dep, 1)}?')
+
+        dep_code = STATION_CODE[parameter.dep]
+        arr_code = STATION_CODE[parameter.arr]
+
+        data = {
+            'chtnDvCd': '1',
+            'stlbTrnClsfCd': '05',
+            'dptRsStnCdNm': parameter.dep,
+            'arvRsStnCdNm': parameter.arr,
+            'dptRsStnCd': dep_code,
+            'arvRsStnCd': arr_code,
+            'dptDt': parameter.date,
+            'dptTm': parameter.time,
+            'psgNum': reduce(lambda x, y: x + y.count, parameter.passengers, 0),                        # Total count
+            'psgInfoPerPrnb1': self._count(parameter.passengers, PassengerType.ADULT),                  # 어른 - 만 13세 이상
+            'psgInfoPerPrnb5': self._count(parameter.passengers, PassengerType.CHILD),                  # 어린이 - 만 6세 ~ 12세 어린이
+            'psgInfoPerPrnb4': self._count(parameter.passengers, PassengerType.SENIOR),                 # 경로 - 만 65세 이상 경로
+            'psgInfoPerPrnb2': self._count(parameter.passengers, PassengerType.DISABILITY_1_TO_3),      # 중증 - 장애의 정도가 심한 장애인(구1~3급)
+            'psgInfoPerPrnb3': self._count(parameter.passengers, PassengerType.DISABILITY_4_TO_6),      # 경증 - 장애의 정도가 심하지 않은 장애인(구4~6급)
+            'locSeatAttCd1': parameter.seat_location.value,
+            'rqSeatAttCd1': parameter.seat_type.value,
+            'trnGpCd': '300',
+            'dlayTnumAplFlg': 'Y',
+            'seatAttCd': '015',
+            'isRequest': 'Y'
+        }
+        self._log(data)
+        res = self.session.post(SR_SEARCH_SCHEDULE, data=data)
+        self._log(res.text)
+
+
+    def _log(self, *msg: str) -> None:
         if self.feedback:
-            print('[*SR]', msg)
+            print('[*SR]', *msg)
+
+
+    def _parse_data(self, response: str):
+        pass
+
+    def _count(self, passengers: list[Passenger], passenger_type: PassengerType) -> int:
+        return reduce(lambda x, y: x + y.count, list(filter(lambda x: x.type_code == passenger_type, passengers)), 0)

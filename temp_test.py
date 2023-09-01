@@ -11,22 +11,22 @@ print('[KO_LOGIN_INFO]', ko_id, ko_pw)
 
 # print(Parameter('a', 'b'))
 
-print(search_station('김천 구미', 3))
+# print(search_station('김천 구미', 3))
 
 s = SR(sr_id, sr_pw, auto_login=False, feedback=True)
 print(s.login())
 print(s.logout())
 
 k = Korail(ko_id, ko_pw, auto_login=False, feedback=True)
-print(k.login())
-print(k.logout())
+# print(k.login())
+# print(k.logout())
 
 
-# p = Parameter(
-#     dep='서울',
-#     arr='부산',
-#     date='20230815',
-#     time='210000'
-# )
-# print(p)
-# print(k.search_train(p))
+p = Parameter(
+    dep='수서',
+    arr='부산',
+    date='20230905',
+    time='210000'
+)
+print(p)
+print(s.search_train(p))
