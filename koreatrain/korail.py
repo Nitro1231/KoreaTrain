@@ -114,9 +114,6 @@ class Korail:
 
 
     def search_train(self, parameter: Parameter | None = None, available_only: bool = True) -> list:
-        def count(passengers: list[Passenger], passenger_type: PassengerType) -> int:
-            return reduce(lambda x, y: x + y.count, list(filter(lambda x: x.type_code == passenger_type, passengers)), 0)
-
         data = {
             'Device': DEVICE,
             'Version': KORAIL_VER,
@@ -126,12 +123,12 @@ class Korail:
             'txtGoHour': parameter.time,
             'selGoTrain': parameter.train_type.value,
             'txtTrnGpCd': parameter.train_type.value,
-            'txtPsgFlg_1': count(parameter.passengers, PassengerType.ADULT),                # 어른 - 만 13세 이상
-            'txtPsgFlg_2': count(parameter.passengers, PassengerType.CHILD),                # 어린이 - 만 6세 ~ 12세 어린이
-            'txtPsgFlg_8': count(parameter.passengers, PassengerType.CHILD_UNDER_6),        # 유아 - 만 6세 미만 유아
-            'txtPsgFlg_3': count(parameter.passengers, PassengerType.SENIOR),               # 경로 - 만 65세 이상 경로
-            'txtPsgFlg_4': count(parameter.passengers, PassengerType.DISABILITY_1_TO_3),    # 중증 - 장애의 정도가 심한 장애인(구1~3급)
-            'txtPsgFlg_5': count(parameter.passengers, PassengerType.DISABILITY_4_TO_6),    # 경증 - 장애의 정도가 심한 장애인(구1~3급)
+            'txtPsgFlg_1': self._count(parameter.passengers, PassengerType.ADULT),                  # 어른 - 만 13세 이상
+            'txtPsgFlg_2': self._count(parameter.passengers, PassengerType.CHILD),                  # 어린이 - 만 6세 ~ 12세 어린이
+            'txtPsgFlg_8': self._count(parameter.passengers, PassengerType.CHILD_UNDER_6),          # 유아 - 만 6세 미만 유아
+            'txtPsgFlg_3': self._count(parameter.passengers, PassengerType.SENIOR),                 # 경로 - 만 65세 이상 경로
+            'txtPsgFlg_4': self._count(parameter.passengers, PassengerType.DISABILITY_1_TO_3),      # 중증 - 장애의 정도가 심한 장애인(구1~3급)
+            'txtPsgFlg_5': self._count(parameter.passengers, PassengerType.DISABILITY_4_TO_6),      # 경증 - 장애의 정도가 심하지 않은 장애인(구4~6급)
             'txtSeatAttCd_2': parameter.heading.value,
             'txtSeatAttCd_3': parameter.seat_location.value,
             'txtSeatAttCd_4': parameter.seat_type.value,
@@ -152,9 +149,9 @@ class Korail:
             # 여기부터
 
 
-    def _log(self, msg: str) -> None:
+    def _log(self, *msg: str) -> None:
         if self.feedback:
-            print('[*Korail]', msg)
+            print('[*Korail]', *msg)
 
 
     def _result_check(self, json_data: dict):
@@ -177,3 +174,7 @@ class Korail:
                     raise ResponseError(f'An unknown error occurred. (message: {text}, code: {code})')
         else:
             return True
+
+
+    def _count(self, passengers: list[Passenger], passenger_type: PassengerType) -> int:
+        return reduce(lambda x, y: x + y.count, list(filter(lambda x: x.type_code == passenger_type, passengers)), 0)

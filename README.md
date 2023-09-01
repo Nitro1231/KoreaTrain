@@ -64,7 +64,7 @@ A Python wrapper for [korail2](https://github.com/carpedm20/korail2) and [SRT](h
 | CHILD_UNDER_6 | 2 | 유아 - 만 6세 미만 유아 | :o: | :x: |
 | SENIOR | 3 | 경로 - 만 65세 이상 경로 | :o: | :o: |
 | DISABILITY_1_TO_3 | 4 | 중증 - 장애의 정도가 심한 장애인(구1~3급) | :o: | :o: |
-| DISABILITY_4_TO_6 | 5 | 경증 - 장애의 정도가 심한 장애인(구1~3급) | :o: | :o: |
+| DISABILITY_4_TO_6 | 5 | 경증 - 장애의 정도가 심하지 않은 장애인(구4~6급) | :o: | :o: |
 
 
 ## `Heading`
