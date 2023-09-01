@@ -4,8 +4,8 @@ from datetime import timezone, timedelta
 
 
 KST = timezone(timedelta(hours=9))
-EMAIL_REGEX = re.compile(r"[^@]+@[^@]+\.[^@]+")
-PHONE_NUMBER_REGEX = re.compile(r"(\d{3})-(\d{3,4})-(\d{4})")
+EMAIL_REGEX = re.compile(r'[^@]+@[^@]+\.[^@]+')
+PHONE_NUMBER_REGEX = re.compile(r'(\d{3})-(\d{3,4})-(\d{4})')
 
 
 class Platform(Enum):
