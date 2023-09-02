@@ -123,12 +123,12 @@ class Korail:
             'txtGoHour': parameter.time,
             'selGoTrain': parameter.train_type.value,
             'txtTrnGpCd': parameter.train_type.value,
-            'txtPsgFlg_1': count(parameter.passengers, PassengerType.ADULT),                  # 어른 - 만 13세 이상
-            'txtPsgFlg_2': count(parameter.passengers, PassengerType.CHILD),                  # 어린이 - 만 6세 ~ 12세 어린이
-            'txtPsgFlg_8': count(parameter.passengers, PassengerType.CHILD_UNDER_6),          # 유아 - 만 6세 미만 유아
-            'txtPsgFlg_3': count(parameter.passengers, PassengerType.SENIOR),                 # 경로 - 만 65세 이상 경로
-            'txtPsgFlg_4': count(parameter.passengers, PassengerType.DISABILITY_1_TO_3),      # 중증 - 장애의 정도가 심한 장애인(구1~3급)
-            'txtPsgFlg_5': count(parameter.passengers, PassengerType.DISABILITY_4_TO_6),      # 경증 - 장애의 정도가 심하지 않은 장애인(구4~6급)
+            'txtPsgFlg_1': count(parameter.passengers, PassengerType.ADULT),                    # 어른 - 만 13세 이상
+            'txtPsgFlg_2': count(parameter.passengers, PassengerType.CHILD),                    # 어린이 - 만 6세 ~ 12세 어린이
+            'txtPsgFlg_8': count(parameter.passengers, PassengerType.CHILD_UNDER_6),            # 유아 - 만 6세 미만 유아
+            'txtPsgFlg_3': count(parameter.passengers, PassengerType.SENIOR),                   # 경로 - 만 65세 이상 경로
+            'txtPsgFlg_4': count(parameter.passengers, PassengerType.DISABILITY_1_TO_3),        # 중증 - 장애의 정도가 심한 장애인(구1~3급)
+            'txtPsgFlg_5': count(parameter.passengers, PassengerType.DISABILITY_4_TO_6),        # 경증 - 장애의 정도가 심하지 않은 장애인(구4~6급)
             'txtSeatAttCd_2': parameter.heading.value,
             'txtSeatAttCd_3': parameter.seat_location.value,
             'txtSeatAttCd_4': parameter.seat_type.value,

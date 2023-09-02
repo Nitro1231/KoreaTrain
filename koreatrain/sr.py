@@ -126,12 +126,12 @@ class SR:
             'arvRsStnCd': arr_code,
             'dptDt': parameter.date,
             'dptTm': parameter.time,
-            'psgNum': reduce(lambda x, y: x + y.count, parameter.passengers, 0),                        # Total count
-            'psgInfoPerPrnb1': count(parameter.passengers, PassengerType.ADULT),                  # 어른 - 만 13세 이상
-            'psgInfoPerPrnb5': count(parameter.passengers, PassengerType.CHILD),                  # 어린이 - 만 6세 ~ 12세 어린이
-            'psgInfoPerPrnb4': count(parameter.passengers, PassengerType.SENIOR),                 # 경로 - 만 65세 이상 경로
-            'psgInfoPerPrnb2': count(parameter.passengers, PassengerType.DISABILITY_1_TO_3),      # 중증 - 장애의 정도가 심한 장애인(구1~3급)
-            'psgInfoPerPrnb3': count(parameter.passengers, PassengerType.DISABILITY_4_TO_6),      # 경증 - 장애의 정도가 심하지 않은 장애인(구4~6급)
+            'psgNum': reduce(lambda x, y: x + y.count, parameter.passengers, 0),                    # Total count
+            'psgInfoPerPrnb1': count(parameter.passengers, PassengerType.ADULT),                    # 어른 - 만 13세 이상
+            'psgInfoPerPrnb5': count(parameter.passengers, PassengerType.CHILD),                    # 어린이 - 만 6세 ~ 12세 어린이
+            'psgInfoPerPrnb4': count(parameter.passengers, PassengerType.SENIOR),                   # 경로 - 만 65세 이상 경로
+            'psgInfoPerPrnb2': count(parameter.passengers, PassengerType.DISABILITY_1_TO_3),        # 중증 - 장애의 정도가 심한 장애인(구1~3급)
+            'psgInfoPerPrnb3': count(parameter.passengers, PassengerType.DISABILITY_4_TO_6),        # 경증 - 장애의 정도가 심하지 않은 장애인(구4~6급)
             'locSeatAttCd1': parameter.seat_location.value,
             'rqSeatAttCd1': parameter.seat_type.value,
             'trnGpCd': '300',

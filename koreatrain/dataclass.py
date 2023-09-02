@@ -51,6 +51,9 @@ class Train:
     general_seat_state: str
     special_seat_state: str
 
+    def __str__(self) -> str:
+        return f'[{self.train_name}] {self.dep_date[:4]}년 {self.dep_date[4:6]}월 {self.dep_date[6:]}일 {self.dep_time[:2]}:{self.dep_time[2:4]}~{self.arr_time[:2]}:{self.arr_time[2:4]} / {self.dep_name} -> {self.arr_name} / 특실: {self.special_seat_state}, 일반실: {self.general_seat_state}'
+
     def __repr__(self) -> str:
         return f'[{type(self).__name__}] {self.__dict__}'
 
@@ -85,10 +88,10 @@ class SRTrain(Train):
         self.delay_time = data['ocurDlayTnum']
         self.general_seat_state = data['gnrmRsvPsbStr']
         self.special_seat_state = data['sprmRsvPsbStr']
-        print(self)
-        print('general', self.general_seat_available())
-        print('special', self.special_seat_available())
-        print('both', self.seat_available())
+        # print(self)
+        # print('general', self.general_seat_available())
+        # print('special', self.special_seat_available())
+        # print('both', self.seat_available())
 
 
 class KorailTrain(Train):
@@ -112,7 +115,7 @@ class KorailTrain(Train):
         self.delay_time = data['h_expn_dpt_dlay_tnum']
         self.general_seat_state = data['h_spe_rsv_nm']
         self.special_seat_state = data['h_gen_rsv_nm']
-        print(self)
-        print('general', self.general_seat_available())
-        print('special', self.special_seat_available())
-        print('both', self.seat_available())
+        # print(self)
+        # print('general', self.general_seat_available())
+        # print('special', self.special_seat_available())
+        # print('both', self.seat_available())
