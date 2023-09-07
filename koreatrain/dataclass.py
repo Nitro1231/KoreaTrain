@@ -52,7 +52,27 @@ class Train:
     special_seat_state: str
 
     def __str__(self) -> str:
-        return f'[{self.train_name}] {self.dep_date[:4]}년 {self.dep_date[4:6]}월 {self.dep_date[6:]}일 {self.dep_time[:2]}:{self.dep_time[2:4]}~{self.arr_time[:2]}:{self.arr_time[2:4]} / {self.dep_name} -> {self.arr_name} / 특실: {self.special_seat_state}, 일반실: {self.general_seat_state}'
+        return (
+            "[{name} {number}] "
+            "{year}년 {month}월 {day}일 "
+            "{dep_hour}:{dep_min}~{arr_hour}:{arr_min} / "
+            "{dep} -> {arr} / "
+            "특실: {special_state}, 일반실: {general_state}"
+        ).format(
+            name=self.train_name,
+            number=self.train_number,
+            year=self.dep_date[:4],
+            month=self.dep_date[4:6],
+            day=self.dep_date[6:],
+            dep_hour=self.dep_time[:2],
+            dep_min=self.dep_time[2:4],
+            arr_hour=self.arr_time[:2],
+            arr_min=self.arr_time[2:4],
+            dep=self.dep_name,
+            arr=self.arr_name,
+            special_state=self.special_seat_state,
+            general_state=self.general_seat_state,
+        )
 
     def __repr__(self) -> str:
         return f'[{type(self).__name__}] {self.__dict__}'
@@ -88,7 +108,7 @@ class SRTrain(Train):
         self.delay_time = data['ocurDlayTnum']
         self.general_seat_state = data['gnrmRsvPsbStr']
         self.special_seat_state = data['sprmRsvPsbStr']
-        # print(self)
+        print(self)
         # print('general', self.general_seat_available())
         # print('special', self.special_seat_available())
         # print('both', self.seat_available())
@@ -115,7 +135,7 @@ class KorailTrain(Train):
         self.delay_time = data['h_expn_dpt_dlay_tnum']
         self.general_seat_state = data['h_spe_rsv_nm']
         self.special_seat_state = data['h_gen_rsv_nm']
-        # print(self)
+        print(self)
         # print('general', self.general_seat_available())
         # print('special', self.special_seat_available())
         # print('both', self.seat_available())
