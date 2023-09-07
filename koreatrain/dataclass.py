@@ -75,7 +75,7 @@ class Train:
         )
 
     def __repr__(self) -> str:
-        return f'[{type(self).__name__}] {self.__dict__}'
+        return str(self)
 
     def general_seat_available(self):
         return self.general_seat_state not in NOT_AVAILABLE

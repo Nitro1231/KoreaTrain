@@ -4,6 +4,7 @@
 
 import json
 import requests
+from datetime import datetime, timedelta
 from functools import reduce
 from .station import search_station, STATION_CODE
 from .dataclass import Parameter, Passenger, SRTrain
@@ -140,16 +141,37 @@ class SR:
             'isRequest': 'Y'
         }
         self._log(data)
-        res = self.session.post(SR_SEARCH_SCHEDULE, data=data)
-        json_data = json.loads(res.text)
-        self._log(json_data)
-        save_json(json_data, f'sr_{parameter.date}-{parameter.time}_{parameter.dep}-{parameter.arr}.json')
+        trains = list()
+        upper_time_limit = int(parameter.time_limit)
+        while True:
+            res = self.session.post(SR_SEARCH_SCHEDULE, data=data)
+            json_data = json.loads(res.text)
 
-        if self._result_check(json_data):
-            train_infos = json_data['outDataSets']['dsOutput1']
-            print(train_infos)
-            trains = [SRTrain(info) for info in train_infos]
-            # print('Trains:', trains)
+            try:
+                assert self._result_check(json_data) # assert True
+            except ResponseError: # No more data
+                # print('A')
+                # print('=' * 20)
+                # print(str(trains).replace(', [', '\n['))
+                return trains
+
+            for info in json_data['outDataSets']['dsOutput1']:
+                train = SRTrain(info)
+                last_dep_time = train.dep_time
+
+                if int(train.dep_time) < upper_time_limit:
+                    if available_only and not train.seat_available():
+                        continue
+                    trains.append(train)
+                else:
+                    # print('B')
+                    # print('=' * 20)
+                    # print(str(trains).replace(', [', '\n['))
+                    return trains
+
+            # print('=' * 20)
+            next_dep_time = datetime.strptime(last_dep_time, '%H%M%S') + timedelta(seconds=1)
+            data['dptTm'] = next_dep_time.strftime('%H%M%S')
 
 
     def _log(self, *msg: str) -> None:
