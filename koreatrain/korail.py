@@ -4,6 +4,7 @@
 
 import json
 import requests
+import logging as log
 from .dataclass import Parameter, Passenger, KorailTrain
 from .constants import PassengerType, EMAIL_REGEX, PHONE_NUMBER_REGEX
 from .errors import KoreaTrainError, LoginError, NotLoggedInError, SoldOutError, NoResultsError, ResponseError
@@ -91,7 +92,7 @@ class Korail:
         }
         res = self.session.post(KORAIL_LOGIN, data=data)
         json_data = json.loads(res.text)
-        self._log(json_data)
+        log.info(json_data)
 
         if json_data['strResult'] == RESULT_SUCCESS and json_data.get('strMbCrdNo') is not None:
             self.key = json_data['Key']
@@ -102,13 +103,13 @@ class Korail:
             return True
         else:
             self.logged_in = False
-            # raise LoginError(json_data['h_msg_txt'])
+            log.warning(json_data['h_msg_txt'])
             return False
 
 
     def logout(self) -> bool:
         res = self.session.get(KORAIL_LOGOUT)
-        self._log(res.text.strip())
+        log.info(res.text.strip())
         self.logged_in = False
         return True
 
@@ -138,29 +139,23 @@ class Korail:
             # 'txtJobDv': '',
             # 'txtMenuId': '11',
         }
-        self._log(data)
+        log.debug(data)
         res = self.session.get(KORAIL_SEARCH_SCHEDULE, params=data)
         json_data = json.loads(res.text)
-        self._log(json_data)
+        log.debug(json_data)
         save_json(json_data, f'ko_{parameter.date}-{parameter.time}_{parameter.dep}-{parameter.arr}.json')
 
         if self._result_check(json_data):
             train_infos = json_data['trn_infos']['trn_info']
-            print(train_infos)
+            log.debug(train_infos)
             trains = [KorailTrain(info) for info in train_infos]
-            # print('Trains:', trains)
-
-
-    def _log(self, *msg: str) -> None:
-        if self.feedback:
-            print('[*Korail]', *msg)
 
 
     def _result_check(self, json_data: dict):
         text = json_data['h_msg_txt']
 
         if self.feedback:
-            self._log(text)
+            log.info(text)
 
         if json_data['strResult'] == RESULT_FAIL:
             code = json_data['h_msg_cd']

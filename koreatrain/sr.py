@@ -4,6 +4,7 @@
 
 import json
 import requests
+import logging as log
 from datetime import datetime, timedelta
 from functools import reduce
 from .station import search_station, STATION_CODE
@@ -91,11 +92,11 @@ class SR:
         }
         res = self.session.post(SR_LOGIN, data=data)
         json_data = json.loads(res.text)
-        self._log(json_data)
+        log.info(json_data)
 
         if json_data.get('strResult') == RESULT_FAIL:
             self.logged_in = False
-            # raise LoginError(json_data['MSG'])
+            log.warning(json_data['MSG'])
             return False
         else:
             self.logged_in = True
@@ -104,7 +105,7 @@ class SR:
 
     def logout(self) -> bool:
         res = self.session.post(SR_LOGOUT)
-        self._log(res.text.strip())
+        log.info(res.text.strip())
         self.logged_in = False
         return True
 
@@ -140,19 +141,19 @@ class SR:
             'seatAttCd': '015',
             'isRequest': 'Y'
         }
-        self._log(data)
         trains = list()
         upper_time_limit = int(parameter.time_limit)
         while True:
+            log.debug('Requesting train info...')
+            log.debug(data)
             res = self.session.post(SR_SEARCH_SCHEDULE, data=data)
             json_data = json.loads(res.text)
 
             try:
                 assert self._result_check(json_data) # assert True
             except ResponseError: # No more data
-                # print('A')
-                # print('=' * 20)
-                # print(str(trains).replace(', [', '\n['))
+                log.debug('=' * 20 + '[SR / End Point - No more data]' + '=' * 20)
+                log.debug(str(trains).replace(', [', ',\n['))
                 return trains
 
             for info in json_data['outDataSets']['dsOutput1']:
@@ -164,19 +165,12 @@ class SR:
                         continue
                     trains.append(train)
                 else:
-                    # print('B')
-                    # print('=' * 20)
-                    # print(str(trains).replace(', [', '\n['))
+                    log.debug('=' * 20 + '[SR / End Point - Reach time limit]' + '=' * 20)
+                    log.debug(str(trains[1:-1]).replace(', [', ',\n['))
                     return trains
 
-            # print('=' * 20)
             next_dep_time = datetime.strptime(last_dep_time, '%H%M%S') + timedelta(seconds=1)
             data['dptTm'] = next_dep_time.strftime('%H%M%S')
-
-
-    def _log(self, *msg: str) -> None:
-        if self.feedback:
-            print('[*SR]', *msg)
 
 
     def _result_check(self, json_data: dict):

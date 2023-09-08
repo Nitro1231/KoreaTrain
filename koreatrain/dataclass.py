@@ -1,3 +1,4 @@
+import logging as log
 from dataclasses import dataclass, field
 from .tools import get_date, get_time
 from .constants import TrainType, PassengerType, Heading, SeatLocation, SeatType, ReserveOption, TRAIN_NAME, NOT_AVAILABLE
@@ -53,11 +54,11 @@ class Train:
 
     def __str__(self) -> str:
         return (
-            "[{name} {number}] "
-            "{year}년 {month}월 {day}일 "
-            "{dep_hour}:{dep_min}~{arr_hour}:{arr_min} / "
-            "{dep} -> {arr} / "
-            "특실: {special_state}, 일반실: {general_state}"
+            '[{name} {number}] '
+            '{year}년 {month}월 {day}일 '
+            '{dep_hour}:{dep_min}~{arr_hour}:{arr_min} / '
+            '{dep} -> {arr} / '
+            '특실: {special_state}, 일반실: {general_state}'
         ).format(
             name=self.train_name,
             number=self.train_number,
@@ -108,10 +109,8 @@ class SRTrain(Train):
         self.delay_time = data['ocurDlayTnum']
         self.general_seat_state = data['gnrmRsvPsbStr']
         self.special_seat_state = data['sprmRsvPsbStr']
-        print(self)
-        # print('general', self.general_seat_available())
-        # print('special', self.special_seat_available())
-        # print('both', self.seat_available())
+        log.debug(self)
+        log.debug(f'General: {self.general_seat_available()} / Special: {self.special_seat_available()} / Both: {self.seat_available()}')
 
 
 class KorailTrain(Train):
@@ -135,7 +134,5 @@ class KorailTrain(Train):
         self.delay_time = data['h_expn_dpt_dlay_tnum']
         self.general_seat_state = data['h_spe_rsv_nm']
         self.special_seat_state = data['h_gen_rsv_nm']
-        print(self)
-        # print('general', self.general_seat_available())
-        # print('special', self.special_seat_available())
-        # print('both', self.seat_available())
+        log.debug(self)
+        log.debug(f'General: {self.general_seat_available()} / Special: {self.special_seat_available()} / Both: {self.seat_available()}')
