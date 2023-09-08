@@ -150,7 +150,7 @@ class Korail:
 
             try:
                 assert self._result_check(json_data) # assert True
-            except ResponseError: # No more data
+            except NoResultsError: # No more data
                 log.debug('=' * 20 + '[Korail / End Point - No more data]' + '=' * 20)
                 log.debug(str(trains).replace(', [', ',\n['))
                 return trains
@@ -178,17 +178,18 @@ class Korail:
         if self.feedback:
             log.info(text)
 
-        if json_data['strResult'] == RESULT_FAIL:
-            code = json_data['h_msg_cd']
+        # if json_data['strResult'] == RESULT_FAIL:
+        code = json_data['h_msg_cd']
 
-            match code:
-                case 'P058':
-                    raise NotLoggedInError()
-                case 'P100' | 'WRG000000' | 'WRD000061' | 'WRT300005':
-                    raise NoResultsError()
-                case 'ERR211161':
-                    raise SoldOutError()
-                case _:
+        match code:
+            case 'P058':
+                raise NotLoggedInError()
+            case 'P100' | 'WRG000000' | 'WRD000061' | 'WRT300005':
+                raise NoResultsError()
+            case 'ERR211161':
+                raise SoldOutError()
+            case _:
+                if json_data['strResult'] == RESULT_FAIL:
                     raise ResponseError(f'An unknown error occurred. (message: {text}, code: {code})')
-        else:
-            return True
+                else:
+                    return True

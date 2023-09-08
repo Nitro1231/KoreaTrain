@@ -26,8 +26,8 @@ param = Parameter(
     dep='수서',
     arr='부산',
     date='20230908',
-    time='000000',
-    time_limit='182500',
+    time='200000',
+    #time_limit='182500',
     passengers=[Passenger(PassengerType.ADULT), Passenger(PassengerType.CHILD, 2)]
 )
 print(s.search_train(param))

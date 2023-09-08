@@ -149,6 +149,7 @@ class SR:
             res = self.session.post(SR_SEARCH_SCHEDULE, data=data)
             json_data = json.loads(res.text)
 
+            self._result_check(json_data)
             try:
                 assert self._result_check(json_data) # assert True
             except ResponseError: # No more data
@@ -176,6 +177,8 @@ class SR:
     def _result_check(self, json_data: dict):
         status = json_data['resultMap'][0]
         result = status.get('strResult')
+        log.debug(status)
+        log.debug(result)
 
         if result is None:
             raise NoResultsError('Response status is not given.')
