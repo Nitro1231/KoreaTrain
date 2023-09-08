@@ -166,7 +166,7 @@ class SR:
                     trains.append(train)
                 else:
                     log.debug('=' * 20 + '[SR / End Point - Reach time limit]' + '=' * 20)
-                    log.debug(str(trains[1:-1]).replace(', [', ',\n['))
+                    log.debug(str(trains).replace(', [', ',\n['))
                     return trains
 
             next_dep_time = datetime.strptime(last_dep_time, '%H%M%S') + timedelta(seconds=1)

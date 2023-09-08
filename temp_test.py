@@ -22,28 +22,17 @@ k = Korail(ko_id, ko_pw, auto_login=False, feedback=True)
 # print(k.logout())
 
 
-# ps = Parameter(
-#     dep='수서',
-#     arr='부산',
-#     date='20230908',
-#     time='000000',
-#     time_limit='182500',
-#     passengers=[Passenger(PassengerType.ADULT), Passenger(PassengerType.CHILD, 2)]
-# )
-ps = Parameter(
+param = Parameter(
     dep='수서',
     arr='부산',
-    date='20230920',
-    time='120000',
-    # time_limit='162500',
+    date='20230908',
+    time='000000',
+    time_limit='182500',
     passengers=[Passenger(PassengerType.ADULT), Passenger(PassengerType.CHILD, 2)]
 )
-pk = Parameter(
-    dep='서울',
-    arr='부산',
-    passengers=[Passenger(PassengerType.ADULT), Passenger(PassengerType.CHILD, 2)]
-)
+print(s.search_train(param))
 
-print(s.search_train(ps))
 print('=' * 30)
-# print(k.search_train(pk))
+
+param.dep = '서울'
+print(k.search_train(param))

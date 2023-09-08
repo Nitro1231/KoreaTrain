@@ -5,6 +5,7 @@
 import json
 import requests
 import logging as log
+from datetime import datetime, timedelta
 from .dataclass import Parameter, Passenger, KorailTrain
 from .constants import PassengerType, EMAIL_REGEX, PHONE_NUMBER_REGEX
 from .errors import KoreaTrainError, LoginError, NotLoggedInError, SoldOutError, NoResultsError, ResponseError
@@ -139,16 +140,36 @@ class Korail:
             # 'txtJobDv': '',
             # 'txtMenuId': '11',
         }
-        log.debug(data)
-        res = self.session.get(KORAIL_SEARCH_SCHEDULE, params=data)
-        json_data = json.loads(res.text)
-        log.debug(json_data)
-        save_json(json_data, f'ko_{parameter.date}-{parameter.time}_{parameter.dep}-{parameter.arr}.json')
+        trains = list()
+        upper_time_limit = int(parameter.time_limit)
+        while True:
+            log.debug('Requesting train info...')
+            log.debug(data)
+            res = self.session.post(KORAIL_SEARCH_SCHEDULE, data=data)
+            json_data = json.loads(res.text)
 
-        if self._result_check(json_data):
-            train_infos = json_data['trn_infos']['trn_info']
-            log.debug(train_infos)
-            trains = [KorailTrain(info) for info in train_infos]
+            try:
+                assert self._result_check(json_data) # assert True
+            except ResponseError: # No more data
+                log.debug('=' * 20 + '[Korail / End Point - No more data]' + '=' * 20)
+                log.debug(str(trains).replace(', [', ',\n['))
+                return trains
+
+            for info in json_data['trn_infos']['trn_info']:
+                train = KorailTrain(info)
+                last_dep_time = train.dep_time
+
+                if int(train.dep_time) < upper_time_limit:
+                    if available_only and not train.seat_available():
+                        continue
+                    trains.append(train)
+                else:
+                    log.debug('=' * 20 + '[Korail / End Point - Reach time limit]' + '=' * 20)
+                    log.debug(str(trains).replace(', [', ',\n['))
+                    return trains
+
+            next_dep_time = datetime.strptime(last_dep_time, '%H%M%S') + timedelta(seconds=1)
+            data['txtGoHour'] = next_dep_time.strftime('%H%M%S')
 
 
     def _result_check(self, json_data: dict):
