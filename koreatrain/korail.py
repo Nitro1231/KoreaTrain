@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 from .dataclass import Parameter, Passenger, KorailTrain
 from .constants import PassengerType, EMAIL_REGEX, PHONE_NUMBER_REGEX
 from .errors import KoreaTrainError, LoginError, NotLoggedInError, SoldOutError, NoResultsError, ResponseError
-from .tools import count, save_json
+from .tools import count, save_json, _code_logger
 
 
 SCHEME = 'https'
@@ -173,13 +173,14 @@ class Korail:
 
 
     def _result_check(self, json_data: dict):
-        text = json_data['h_msg_txt']
+        result = json_data['strResult']
+        code = json_data['h_msg_cd']
+        message = json_data['h_msg_txt']
+        log.debug('Korail result check: ' + str(json_data))
+        _code_logger('korail', result, code, message)
 
         if self.feedback:
-            log.info(text)
-
-        # if json_data['strResult'] == RESULT_FAIL:
-        code = json_data['h_msg_cd']
+            log.info(message)
 
         match code:
             case 'P058':
@@ -189,7 +190,7 @@ class Korail:
             case 'ERR211161':
                 raise SoldOutError()
             case _:
-                if json_data['strResult'] == RESULT_FAIL:
-                    raise ResponseError(f'An unknown error occurred. (message: {text}, code: {code})')
+                if result == RESULT_FAIL:
+                    raise ResponseError(f'An unknown error occurred. (message: {message}, code: {code})')
                 else:
                     return True

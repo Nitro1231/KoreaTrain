@@ -11,7 +11,7 @@ from .station import search_station, STATION_CODE
 from .dataclass import Parameter, Passenger, SRTrain
 from .constants import PassengerType, EMAIL_REGEX, PHONE_NUMBER_REGEX
 from .errors import NoResultsError, ResponseError
-from .tools import count, save_json
+from .tools import count, save_json, _code_logger
 
 
 SCHEME = 'https'
@@ -149,7 +149,7 @@ class SR:
             res = self.session.post(SR_SEARCH_SCHEDULE, data=data)
             json_data = json.loads(res.text)
 
-            self._result_check(json_data)
+            # self._result_check(json_data)
             try:
                 assert self._result_check(json_data) # assert True
             except ResponseError: # No more data
@@ -177,8 +177,23 @@ class SR:
     def _result_check(self, json_data: dict):
         status = json_data['resultMap'][0]
         result = status.get('strResult')
-        log.debug(status)
-        log.debug(result)
+        code = status['msgCd']
+        message = status['msgTxt']
+        log.debug('SR result check: ' + str(status))
+        _code_logger('sr', result, code, message)
+
+        if self.feedback:
+            log.info(message)
+
+        match code:
+            case 'IRG000000':
+                if result == RESULT_SUCCESS:
+                    return True
+            case 'WRG000000':
+                raise NoResultsError()
+            case _:
+                if result == RESULT_SUCCESS:
+                    return True
 
         if result is None:
             raise NoResultsError('Response status is not given.')

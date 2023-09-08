@@ -25,8 +25,8 @@ k = Korail(ko_id, ko_pw, auto_login=False, feedback=True)
 param = Parameter(
     dep='수서',
     arr='부산',
-    date='20230908',
-    time='200000',
+    date='20230910',
+    time='1d0000',
     #time_limit='182500',
     passengers=[Passenger(PassengerType.ADULT), Passenger(PassengerType.CHILD, 2)]
 )
@@ -34,5 +34,5 @@ print(s.search_train(param))
 
 print('=' * 30)
 
-param.dep = '서울'
+param.dep = '서울1'
 print(k.search_train(param))

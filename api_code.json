@@ -1,0 +1,22 @@
+{
+    "korail": {
+        "SUCC": {
+            "IRG000000": "정상처리되었습니다",
+            "WRG000000": "조회 결과가 없습니다."
+        },
+        "FAIL": {
+            "WRG200004": "입력값오류(출발역,도착역,경유역,지정역)",
+            "S016": "승차권예약은 9매까지 가능합니다. 승객인원을 확인하여 주십시오."
+        }
+    },
+    "sr": {
+        "SUCC": {
+            "IRG000000": "정상처리되었습니다"
+        },
+        "FAIL": {
+            "WRG000000": "조회 결과가 없습니다.",
+            "WRD000059": "2023년 추석 승차권 예약발매 일정은 다음과 같습니다.<br><br>1. 대상열차<br><span style=\"padding-left: 1rem;display: block;\">2023.9.27.(수) ~ 10.3.(화)에  운행하는 모든 열차</span>2. 예매일자<br><span style=\"padding-left: 1rem;display: block;\">2023.9.5.(화) ~ 9.7.(목)</span>3. 결제일자<br><span style=\"padding-left: 1rem;display: block;\">9.7.(목) 15:00 ~ 9.10.(일) 24:00</span>",
+            "WRD000058": "2023년 추석 승차권 예약발매 일정은 다음과 같습니다.<br><br>1. 대상열차<br><span style=\"padding-left: 1rem;display: block;\">2023.9.27.(수) ~ 10.3.(화)에  운행하는 모든 열차</span>2. 예매일자<br><span style=\"padding-left: 1rem;display: block;\">2023.9.5.(화) ~ 9.7.(목)</span>3. 결제일자<br><span style=\"padding-left: 1rem;display: block;\">9.7.(목) 15:00 ~ 9.10.(일) 24:00</span>"
+        }
+    }
+}

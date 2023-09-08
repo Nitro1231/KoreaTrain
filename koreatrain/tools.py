@@ -19,3 +19,10 @@ def count(passengers: list, passenger_type: ...) -> int:
 def save_json(data: dict, file_name: str):
     with open(file_name, 'w', encoding='utf8') as f:
         f.write(json.dumps(data, indent=4, ensure_ascii=False))
+
+
+def _code_logger(platform, result, code, message):
+    with open('api_code.json', 'r', encoding='utf8') as f:
+        data = json.load(f)
+    data[platform][result][code] = message
+    save_json(data, 'api_code.json')
