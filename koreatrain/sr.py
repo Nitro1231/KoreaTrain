@@ -9,8 +9,8 @@ from datetime import datetime, timedelta
 from functools import reduce
 from .station import search_station, STATION_CODE
 from .dataclass import Parameter, Passenger, SRTrain
-from .constants import PassengerType, EMAIL_REGEX, PHONE_NUMBER_REGEX
-from .errors import NoResultsError, ResponseError
+from .constants import PassengerType, Heading, ReserveOption, EMAIL_REGEX, PHONE_NUMBER_REGEX
+from .errors import NotLoggedInError, SoldOutError, NoResultsError, ResponseError
 from .tools import count, save_json, _code_logger
 
 
@@ -35,6 +35,14 @@ DEFAULT_HEADERS = {
         '(KHTML, like Gecko) Version/4.0 Chrome/39.0.0.0 Mobile Safari/537.36SRT-APP-Android V.1.0.6'
     ),
     'Accept': 'application/json',
+}
+
+PASSENGER_MAP = {
+    PassengerType.ADULT: '1',
+    PassengerType.CHILD: '5',
+    PassengerType.SENIOR: '4',
+    PassengerType.DISABILITY_1_TO_3: '2',
+    PassengerType.DISABILITY_4_TO_6: '3'
 }
 
 RESULT_SUCCESS = 'SUCC'
@@ -172,6 +180,68 @@ class SR:
 
         log.debug(str(trains).replace(', [', ',\n['))
         return trains
+
+
+    def reserve(self, parameter: Parameter, train: SRTrain):
+        if not self.logged_in:
+            raise NotLoggedInError()
+        if not isinstance(parameter, Parameter):
+            raise TypeError(f'The `parameter` must be a Parameter instance.')
+        elif not isinstance(train, SRTrain):
+            raise TypeError(f'The `train` must be a SRTrain instance.')
+        elif train.train_code != '17':
+            raise ValueError(f'The train must be an `SRT` train, but {train.train_name} was given.')
+        elif len(parameter.passengers) <= 0:
+            raise ValueError('There must be at least one passenger indicated in the parameter.')
+
+        special_seat = (parameter.reserve_option in [ReserveOption.SPECIAL_FIRST, ReserveOption.SPECIAL_ONLY])
+        log.debug(f'Reserve option: {parameter.reserve_option} / Special seat: {special_seat}')
+        if not train.seat_available():
+            raise SoldOutError()
+        elif parameter.reserve_option == ReserveOption.SPECIAL_ONLY and not train.special_seat_available():
+            raise SoldOutError()
+        elif parameter.reserve_option == ReserveOption.GENERAL_ONLY and not train.general_seat_available():
+            raise SoldOutError()
+        elif parameter.reserve_option == ReserveOption.SPECIAL_FIRST and not train.special_seat_available():
+            special_seat = False
+        elif parameter.reserve_option == ReserveOption.GENERAL_FIRST and not train.general_seat_available():
+            special_seat = True
+
+        data = {
+            'reserveType': '11',
+            'jobId': '1101', # 개인 에약
+            'jrnyCnt': '1',
+            'jrnyTpCd': '11',
+            'jrnySqno1': '001',
+            'stndFlg': 'N',
+            'trnGpCd1': '300', # 차종구분, 300 = SRT
+            'stlbTrnClsfCd1': train.train_code,
+            'dptDt1': train.dep_date,
+            'dptTm1': train.dep_time,
+            'runDt1': train.dep_date,
+            'trnNo1': '%05d' % int(train.train_number),
+            'dptRsStnCd1': train.dep_code,
+            'dptRsStnCdNm1': train.dep_name,
+            'arvRsStnCd1': train.arr_code,
+            'arvRsStnCdNm1': train.arr_name,
+            'totPrnb': reduce(lambda x, y: x + y.count, parameter.passengers, 0),
+            'psgGridcnt': str(len(parameter.passengers))
+        }
+        for i, passenger in enumerate(parameter.passengers):
+            data[f'psgTpCd{i + 1}'] = str(PASSENGER_MAP[passenger.type_code])
+            data[f'psgInfoPerPrnb{i + 1}'] = str(passenger.count)
+            data[f'locSeatAttCd{i + 1}'] = parameter.seat_location.value
+            data[f'rqSeatAttCd{i + 1}'] = parameter.seat_type.value
+            data[f'dirSeatAttCd{i + 1}'] = Heading.FORWARD.value # Heading ('009': 정방향)
+            data[f'smkSeatAttCd{i + 1}'] = '000'
+            data[f'etcSeatAttCd{i + 1}'] = '000'
+            data[f'psrmClCd{i + 1}'] = '2' if special_seat else '1' # SeatType: ('1': 일반실, '2': 특실)
+
+        log.info(data)
+        res = self.session.post(SR_RESERVE, data=data)
+        json_data = json.loads(res.text)
+        log.info(json_data)
+        self._result_check(json_data)
 
 
     def _result_check(self, json_data: dict):
