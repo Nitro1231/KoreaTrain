@@ -97,9 +97,6 @@ class Korail:
 
         if json_data['strResult'] == RESULT_SUCCESS and json_data.get('strMbCrdNo') is not None:
             self.key = json_data['Key']
-            # self.membership_number = j['strMbCrdNo']
-            # self.name = j['strCustNm']
-            # self.email = j['strEmailAdr']
             self.logged_in = True
             return True
         else:
@@ -152,8 +149,7 @@ class Korail:
                 assert self._result_check(json_data) # assert True
             except NoResultsError: # No more data
                 log.debug('=' * 20 + '[Korail / End Point - No more data]' + '=' * 20)
-                log.debug(str(trains).replace(', [', ',\n['))
-                return trains
+                break
 
             for info in json_data['trn_infos']['trn_info']:
                 train = KorailTrain(info)
@@ -165,11 +161,13 @@ class Korail:
                     trains.append(train)
                 else:
                     log.debug('=' * 20 + '[Korail / End Point - Reach time limit]' + '=' * 20)
-                    log.debug(str(trains).replace(', [', ',\n['))
-                    return trains
+                    break
 
             next_dep_time = datetime.strptime(last_dep_time, '%H%M%S') + timedelta(seconds=1)
             data['txtGoHour'] = next_dep_time.strftime('%H%M%S')
+
+        log.debug(str(trains).replace(', [', ',\n['))
+        return trains
 
 
     def _result_check(self, json_data: dict):
@@ -183,14 +181,18 @@ class Korail:
             log.info(message)
 
         match code:
-            case 'P058':
+            case 'IRZ000001': # Login success.
+                return True
+            case 'S034' | 'P058': # Login failed.
                 raise NotLoggedInError()
             case 'P100' | 'WRG000000' | 'WRD000061' | 'WRT300005':
                 raise NoResultsError()
             case 'ERR211161':
                 raise SoldOutError()
             case _:
-                if result == RESULT_FAIL:
-                    raise ResponseError(f'An unknown error occurred. (message: {message}, code: {code})')
-                else:
+                if result == RESULT_SUCCESS:
                     return True
+                elif result == RESULT_FAIL:
+                    raise ResponseError(f'Request failed: {code} - {message}.')
+                else:
+                    raise ResponseError(f'Undefined result status "{result}".')

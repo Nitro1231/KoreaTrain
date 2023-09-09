@@ -149,13 +149,11 @@ class SR:
             res = self.session.post(SR_SEARCH_SCHEDULE, data=data)
             json_data = json.loads(res.text)
 
-            # self._result_check(json_data)
             try:
                 assert self._result_check(json_data) # assert True
-            except ResponseError: # No more data
+            except NoResultsError: # No more data
                 log.debug('=' * 20 + '[SR / End Point - No more data]' + '=' * 20)
-                log.debug(str(trains).replace(', [', ',\n['))
-                return trains
+                break
 
             for info in json_data['outDataSets']['dsOutput1']:
                 train = SRTrain(info)
@@ -167,11 +165,13 @@ class SR:
                     trains.append(train)
                 else:
                     log.debug('=' * 20 + '[SR / End Point - Reach time limit]' + '=' * 20)
-                    log.debug(str(trains).replace(', [', ',\n['))
-                    return trains
+                    break
 
             next_dep_time = datetime.strptime(last_dep_time, '%H%M%S') + timedelta(seconds=1)
             data['dptTm'] = next_dep_time.strftime('%H%M%S')
+
+        log.debug(str(trains).replace(', [', ',\n['))
+        return trains
 
 
     def _result_check(self, json_data: dict):
@@ -186,20 +186,14 @@ class SR:
             log.info(message)
 
         match code:
-            case 'IRG000000':
-                if result == RESULT_SUCCESS:
-                    return True
-            case 'WRG000000':
+            case 'IRG000000': # 정상처리되었습니다.
+                return True
+            case 'WRG000000': # 조회 결과가 없습니다. 
                 raise NoResultsError()
             case _:
                 if result == RESULT_SUCCESS:
                     return True
-
-        if result is None:
-            raise NoResultsError('Response status is not given.')
-        if result == RESULT_SUCCESS:
-            return True
-        elif result == RESULT_FAIL:
-            raise ResponseError(f'Request failed: {status["msgTxt"]}.')
-        else:
-            raise ResponseError(f'Undefined result status "{result}".')
+                elif result == RESULT_FAIL:
+                    raise ResponseError(f'Request failed: {code} - {message}.')
+                else:
+                    raise ResponseError(f'Undefined result status "{result}".')
