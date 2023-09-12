@@ -185,7 +185,7 @@ class SR:
     def reserve(self, parameter: Parameter, train: SRTrain):
         if not self.logged_in:
             raise NotLoggedInError()
-        if not isinstance(parameter, Parameter):
+        elif not isinstance(parameter, Parameter):
             raise TypeError(f'The `parameter` must be a Parameter instance.')
         elif not isinstance(train, SRTrain):
             raise TypeError(f'The `train` must be a SRTrain instance.')
@@ -195,7 +195,6 @@ class SR:
             raise ValueError('There must be at least one passenger indicated in the parameter.')
 
         special_seat = (parameter.reserve_option in [ReserveOption.SPECIAL_FIRST, ReserveOption.SPECIAL_ONLY])
-        log.debug(f'Reserve option: {parameter.reserve_option} / Special seat: {special_seat}')
         if not train.seat_available():
             raise SoldOutError()
         elif parameter.reserve_option == ReserveOption.SPECIAL_ONLY and not train.special_seat_available():
@@ -206,6 +205,7 @@ class SR:
             special_seat = False
         elif parameter.reserve_option == ReserveOption.GENERAL_FIRST and not train.general_seat_available():
             special_seat = True
+        log.debug(f'Reserve option: {parameter.reserve_option} / Special seat: {special_seat}')
 
         data = {
             'reserveType': '11',
@@ -241,7 +241,23 @@ class SR:
         res = self.session.post(SR_RESERVE, data=data)
         json_data = json.loads(res.text)
         log.info(json_data)
-        self._result_check(json_data)
+        if self._result_check(json_data):
+            pass
+            # Start from here after finishing get_reservations method.
+
+
+    def get_reservations(self, paid_only: bool = False):
+        if not self.logged_in:
+            raise NotLoggedInError()
+
+        res = self.session.post(SR_TICKETS, data={'pageNo': '0'})
+        json_data = json.loads(res.text)
+        log.info(json_data)
+        
+        if self._result_check(json_data):
+            for train, pay in zip(json_data['trainListMap'], json_data['payListMap']):
+                pass
+                # Start from here after creating base dataclass for both SR and Korail service.
 
 
     def _result_check(self, json_data: dict):

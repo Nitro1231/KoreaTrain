@@ -26,12 +26,15 @@ param = Parameter(
     dep='수서',
     arr='부산',
     date='20230920',
-    time='160000',
+    time='200000',
     #time_limit='182500',
-    passengers=[Passenger(PassengerType.ADULT), Passenger(PassengerType.CHILD, 2)]
+    passengers=[Passenger(PassengerType.ADULT), Passenger(PassengerType.CHILD, 2)],
+    reserve_option=ReserveOption.SPECIAL_FIRST
 )
 sr_trains = sr.search_train(param)
-sr.reserve(param, sr_trains[0])
+print(sr_trains[0])
+# sr.reserve(param, sr_trains[0])
+print(sr.get_reservations())
 
 # print('=' * 30)
 
