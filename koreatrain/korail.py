@@ -170,6 +170,14 @@ class Korail:
         return trains
 
 
+    def reserve(self, parameter: Parameter, train: KorailTrain):
+        pass
+
+
+    def get_reservations(self, paid_only: bool = False):
+        pass
+
+
     def _result_check(self, json_data: dict):
         result = json_data['strResult']
         code = json_data['h_msg_cd']
