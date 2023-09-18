@@ -18,7 +18,7 @@ print(sr.login())
 # print(sr.logout())
 
 ko = Korail(ko_id, ko_pw, auto_login=False, feedback=True)
-# print(ko.login())
+print(ko.login())
 # print(ko.logout())
 
 
@@ -40,3 +40,4 @@ print(sr.get_reservations())
 
 # param.dep = '서울'
 # print(k.search_train(param))
+print(ko.get_reservations())

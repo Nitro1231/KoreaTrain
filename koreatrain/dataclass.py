@@ -136,3 +136,49 @@ class KorailTrain(Train):
         self.special_seat_state = data['h_gen_rsv_nm']
         log.debug(self)
         log.debug(f'General: {self.general_seat_available()} / Special: {self.special_seat_available()} / Both: {self.seat_available()}')
+
+
+class Reservations:
+    reservations_number: str
+    total_cost: str
+    seat_count: str
+    train_code: str
+    train_name: str
+    train_number: str
+    dep_date: str
+    dep_time: str
+    dep_code: str
+    dep_name: str
+    arr_time: str
+    arr_code: str
+    arr_name: str
+    due_date: str
+    due_time: str
+    paid: bool
+
+    def __str__(self) -> str:
+        return (
+            '[{name} {number}] '
+            '{year}년 {month}월 {day}일 '
+            '{dep_hour}:{dep_min}~{arr_hour}:{arr_min} / '
+            '{dep} -> {arr} / '
+            '{cost}원 ({seats}석) / '
+            '결제 완료' if self.paid else '{due_hour}:{due_min} 까지 결제'
+        ).format(
+            name=self.train_name,
+            number=self.train_number,
+            year=self.dep_date[:4],
+            month=self.dep_date[4:6],
+            day=self.dep_date[6:],
+            dep_hour=self.dep_time[:2],
+            dep_min=self.dep_time[2:4],
+            arr_hour=self.arr_time[:2],
+            arr_min=self.arr_time[2:4],
+            dep=self.dep_name,
+            arr=self.arr_name,
+            due_hour=self.due_time[:2],
+            due_min=self.due_time[2:4]
+        )
+
+    def __repr__(self) -> str:
+        return str(self)

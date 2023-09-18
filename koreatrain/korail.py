@@ -175,7 +175,18 @@ class Korail:
 
 
     def get_reservations(self, paid_only: bool = False):
-        pass
+        if not self.logged_in:
+            raise NotLoggedInError()
+
+        data = {
+            'Device': DEVICE,
+            'Version': KORAIL_VER,
+            'Key': self.key,
+        }
+        res = self.session.post(KORAIL_MYRESERVATIONLIST, data=data)
+        json_data = json.loads(res.text)
+        log.debug(json_data)
+        self._result_check(json_data)
 
 
     def _result_check(self, json_data: dict):
